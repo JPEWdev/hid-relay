@@ -1,0 +1,13 @@
+option(
+    'avrdude_programmer',
+    type: 'string',
+    value: 'avrispmkII',
+    description: 'avrdude programmer type'
+)
+
+option(
+    'avrdude_port',
+    type: 'string',
+    value: 'usb',
+    description: 'avrdude connection port'
+)

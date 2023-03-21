@@ -1,0 +1,65 @@
+# This cross file defines how to build the stand alone HID Relay Controller
+# board included in this project. You can also use it as a template for
+# writing your own cross file for a custom board
+
+[binaries]
+c = 'avr-gcc'
+objcopy = 'avr-objcopy'
+ar = 'avr-ar'
+strip = 'avr-strip'
+avrdude = 'avrdude'
+
+[built-in options]
+
+[properties]
+# The speed the device will be programmed by avrdude
+avrdude_speed = '1.1'
+
+# Number of relays. Must be in the range [1..8]
+num_relays = '8'
+
+# The speed of the CPU clock, in Hz
+cpu_speed = '12000000'
+
+# This is the port where the USB bus is connected. When you configure it to
+# "B", the registers PORTB, PINB and DDRB will be used.
+usb_ioport = 'B'
+
+# This is the bit number in USB_CFG_IOPORT where the USB D- line is connected.
+# This may be any bit in the port.
+usb_dminus_bit = '3'
+
+# This is the bit number in USB_CFG_IOPORT where the USB D+ line is connected.
+# This may be any bit in the port. Please note that D+ must also be connected
+# to interrupt pin INT0! [You can also use other interrupts, see section
+# "Optional MCU Description" below, or you can connect D- to the interrupt, as
+# it is required if you use the USB_COUNT_SOF feature. If you use D- for the
+# interrupt, the USB interrupt will also be triggered at Start-Of-Frame
+# markers every millisecond.]
+usb_dplus_bit = '6'
+
+# FUSES:
+#
+#	N = Unprogrammed(1)
+#	Y = Programmed(0)
+#
+# BIT	LOW			HIGH		EXTENDED
+# 7		CKDIV=N		RSTDISBL=N
+# 6		CKOUT=N		DWEN=N
+# 5		SUT1=N		SPIEN=Y
+# 4		SUT0=N		WDTON=Y
+# 3		CKSEL3=N	EESAVE=N
+# 2		CKSEL2=N	BODLEVEL2=N
+# 1		CKSEL1=N	BODLEVEL1=Y
+# 0		CKSEL0=N	BODLEVEL0=N	SELFPRGEN=N
+#
+# http://www.engbedded.com/fusecalc/
+lfuse = '0xff'
+hfuse = '0xcb'
+efuse = '0xff'
+
+[host_machine]
+system = 'baremetal'
+cpu_family = 'avr'
+cpu = 'attiny861'
+endian = 'none'
