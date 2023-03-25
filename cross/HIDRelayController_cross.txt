@@ -19,6 +19,16 @@ avrdude_speed = '1.1'
 # Number of relays. Must be in the range [1..8]
 num_relays = '8'
 
+# The port on which the relays are connected. The first relay (Relay 1) must
+# be PIN 0, Relay 2 must be PIN 1, etc.
+relay_ioport = 'A'
+
+# The ioport on which the LED is connected
+led_ioport = 'B'
+
+# The pin on which the LED is connected in the IO port
+led_bit = '1'
+
 # The speed of the CPU clock, in Hz
 cpu_speed = '12000000'
 

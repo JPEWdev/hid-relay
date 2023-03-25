@@ -14,21 +14,25 @@
 #include "oddebug.h"
 #include "usbdrv.h"
 
-#define LED_PORT PORTB
-#define LED_PIN PINB
-#define LED_DDR DDRB
-#define LED_MASK _BV(1)
+#define _concat(a, b) a##b
+#define concat(a, b) _concat(a, b)
 
-#define RELAY_PORT PORTA
-#define RELAY_PIN PINA
-#define RELAY_DDR DDRA
+#define LED_PORT concat(PORT, LED_IOPORT_NAME)
+#define LED_PIN concat(PIN, LED_IOPORT_NAME)
+#define LED_DDR concat(DDR, LED_IOPORT_NAME)
+#define LED_MASK _BV(LED_BIT)
+
+#define RELAY_PORT concat(PORT, RELAY_IOPORT_NAME)
+#define RELAY_PIN concat(PIN, RELAY_IOPORT_NAME)
+#define RELAY_DDR concat(DDR, RELAY_IOPORT_NAME)
+#define RELAY_MASK ((1 << NUM_RELAYS) - 1)
 
 #define USB_HID_REPORT_TYPE_FEATURE 3
 #define GET_REPORT 1
 #define SET_REPORT 9
 
-static uint8_t relay_state;
-#define set_relays() (RELAY_PORT = relay_state)
+uint8_t relay_state;
+#define set_relays() (RELAY_PORT = (RELAY_PORT & ~RELAY_MASK) | relay_state)
 
 PROGMEM const char usbHidReportDescriptor[] = {
     // clang-format off
@@ -57,7 +61,7 @@ void set_serial(uint8_t const *data) {
 }
 
 void set_all_relays(bool on) {
-    relay_state = on ? (1 << NUM_RELAYS) - 1 : 0x00;
+    relay_state = on ? RELAY_MASK : 0x00;
     set_relays();
 }
 
@@ -160,8 +164,12 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 }
 
 int main(void) {
-    RELAY_DDR = 0xFF;
+    RELAY_DDR |= RELAY_MASK;
+#if NUM_RELAYS == 8
     RELAY_PORT = 0;
+#else
+    RELAY_PORT &= ~RELAY_MASK;
+#endif
     relay_state = 0;
 
     LED_DDR |= LED_MASK;
