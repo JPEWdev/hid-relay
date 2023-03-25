@@ -47,6 +47,11 @@ if led_ioport != ''
   )
 endif
 
+usb_intr_cfg = meson.get_cross_property('usb_intr_cfg', [])
+foreach c : usb_intr_cfg
+  add_project_arguments('-D' + c, language: 'c')
+endforeach
+
 add_project_link_arguments(
     '-mmcu=' + host_machine.cpu(),
     language: 'c',
