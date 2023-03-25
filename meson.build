@@ -151,6 +151,17 @@ run_target('readeeprom',
   ]
 )
 
+run_target('readflash',
+  command: [
+    avrdude,
+    '-c', avrdude_programmer,
+    '-P', avrdude_port,
+    '-p', host_machine.cpu(),
+    '-B', avrdude_speed,
+    '-U', 'flash:r:flash.hex:i'
+  ]
+)
+
 avr_size = find_program('size')
 
 run_target('stats',
