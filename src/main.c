@@ -51,13 +51,26 @@ PROGMEM const char usbHidReportDescriptor[] = {
 _Static_assert(sizeof(usbHidReportDescriptor) ==
                USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH);
 
-static uint8_t buf[8];
-static uint8_t buf_len;
+uint8_t buf[8];
+uint8_t buf_len;
 
-static uint8_t EEMEM serial[6] = {'J', 'P', 'E', 'W', ' ', ' '};
+uint8_t EEMEM serial[6] = {'J', 'P', 'E', 'W', ' ', ' '};
+
+#if REPORT_SERIAL
+int usbDescriptorStringSerialNumber[1 + sizeof(serial)];
+
+void set_ram_serial(uint8_t const *data) {
+    for (uint8_t i = 0; i < sizeof(serial); i++) {
+        usbDescriptorStringSerialNumber[i + 1] = data[i];
+    }
+}
+#endif
 
 void set_serial(uint8_t const *data) {
     eeprom_write_block(data, serial, sizeof(serial));
+#if REPORT_SERIAL
+    set_ram_serial(data);
+#endif
 }
 
 void set_all_relays(bool on) {
@@ -174,6 +187,13 @@ int main(void) {
 
     LED_DDR |= LED_MASK;
     LED_PORT &= ~LED_MASK;
+
+#if REPORT_SERIAL
+    usbDescriptorStringSerialNumber[0] =
+        USB_STRING_DESCRIPTOR_HEADER(sizeof(serial));
+    eeprom_read_block(buf, serial, sizeof(serial));
+    set_ram_serial(buf);
+#endif
 
     wdt_enable(WDTO_1S);
 

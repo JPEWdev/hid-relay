@@ -37,6 +37,7 @@ add_project_arguments(
     '-DUSB_CFG_DMINUS_BIT=' + usb_dminus_bit,
     '-DUSB_CFG_DPLUS_BIT=' + usb_dplus_bit,
     '-DNUM_RELAYS=' + num_relays,
+    '-DREPORT_SERIAL=' + (get_option('usb_serial_id') ? '1' : '0'),
     language: 'c',
 )
 
