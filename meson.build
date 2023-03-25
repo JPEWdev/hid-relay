@@ -46,7 +46,10 @@ program = executable('hidrelay', [
     'usbdrv/usbdrvasm.S',
     'usbdrv/oddebug.c',
   ],
-  include_directories: include_directories('src', 'usbdrv')
+  include_directories: include_directories('src', 'usbdrv'),
+  link_args: [
+    '-Wl,-Map,@0@/hidrelay.map'.format(meson.current_build_dir()),
+  ]
 )
 
 objcopy = find_program('objcopy')
