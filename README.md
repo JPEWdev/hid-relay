@@ -49,6 +49,10 @@ command, like:
 
     meson compile -C build COMMAND
 
+Or with ninja:
+
+    ninja -C build COMMAND
+
 The included commands are:
 
 | Command       | Description                                                       |
@@ -67,8 +71,8 @@ factory).
 Thus, to program your board after compiling, run:
 
     # Uncomment this line if this is a fresh chip that has never been programmed before
-    # meson compile -C build writefuses
-    meson compile -C build writeflash
+    # ninja -C build writefuses
+    ninja -C build writeflash
 
 **NOTE:** Be careful when programming fuses as incorrect fuses can cause the
 AVR to be unprogrammable, which can only be corrected using High Voltage Serial
