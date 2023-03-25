@@ -7,6 +7,7 @@ c = 'avr-gcc'
 objcopy = 'avr-objcopy'
 ar = 'avr-ar'
 strip = 'avr-strip'
+size = 'avr-size'
 avrdude = 'avrdude'
 
 [built-in options]

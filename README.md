@@ -57,6 +57,7 @@ The included commands are:
 | `writefuses`  | Write the fuse configuration to the device                        |
 | `readfuses`   | Display the current fuse configuration from the device            |
 | `readeeprom`  | Dump the current contents of the EEPROM to the file `eeprom.hex`  |
+| `stats`       | Show static memory usage                                          |
 
 The `writefuses` command can be particularly useful to provision a new fresh
 AVR, as it runs at a slow speed so it can correctly program a device even if it

@@ -140,3 +140,13 @@ run_target('readeeprom',
 	'-U', 'eeprom:r:eeprom.hex:i'
   ]
 )
+
+avr_size = find_program('size')
+
+run_target('stats',
+  depends: [program],
+  command: [
+    avr_size,
+    program,
+  ]
+)

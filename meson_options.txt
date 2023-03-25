@@ -11,3 +11,10 @@ option(
     value: 'usb',
     description: 'avrdude connection port'
 )
+
+option(
+    'usb_serial_id',
+    type: 'boolean',
+    value: true,
+    description: 'Report relay serial number as USB serial number as a convenience. Set to false to retain legacy behavior'
+)
