@@ -17,10 +17,12 @@
 #define _concat(a, b) a##b
 #define concat(a, b) _concat(a, b)
 
+#ifdef LED_IOPORT_NAME
 #define LED_PORT concat(PORT, LED_IOPORT_NAME)
 #define LED_PIN concat(PIN, LED_IOPORT_NAME)
 #define LED_DDR concat(DDR, LED_IOPORT_NAME)
 #define LED_MASK _BV(LED_BIT)
+#endif
 
 #define RELAY_PORT concat(PORT, RELAY_IOPORT_NAME)
 #define RELAY_PIN concat(PIN, RELAY_IOPORT_NAME)
@@ -185,8 +187,10 @@ int main(void) {
 #endif
     relay_state = 0;
 
+#ifdef LED_IOPORT_NAME
     LED_DDR |= LED_MASK;
     LED_PORT &= ~LED_MASK;
+#endif
 
 #if REPORT_SERIAL
     usbDescriptorStringSerialNumber[0] =

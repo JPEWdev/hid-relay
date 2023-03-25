@@ -17,8 +17,6 @@ usb_dminus_bit = meson.get_cross_property('usb_dminus_bit')
 usb_dplus_bit = meson.get_cross_property('usb_dplus_bit')
 num_relays = meson.get_cross_property('num_relays')
 relay_ioport = meson.get_cross_property('relay_ioport')
-led_ioport = meson.get_cross_property('led_ioport')
-led_bit = meson.get_cross_property('led_bit')
 
 assert(num_relays.to_int() >= 1 and num_relays.to_int() <= 8, 'num_relays must be in the range [1..8]')
 
@@ -31,8 +29,6 @@ add_project_arguments(
     '-mmcu=' + host_machine.cpu(),
     '-DF_CPU=' + cpu_speed + 'UL',
     '-DRELAY_IOPORT_NAME=' + relay_ioport,
-    '-DLED_IOPORT_NAME=' + led_ioport,
-    '-DLED_BIT=' + led_bit,
     '-DUSB_CFG_IOPORTNAME=' + usb_ioport,
     '-DUSB_CFG_DMINUS_BIT=' + usb_dminus_bit,
     '-DUSB_CFG_DPLUS_BIT=' + usb_dplus_bit,
@@ -40,6 +36,16 @@ add_project_arguments(
     '-DREPORT_SERIAL=' + (get_option('usb_serial_id') ? '1' : '0'),
     language: 'c',
 )
+
+led_ioport = meson.get_cross_property('led_ioport', '')
+led_bit = meson.get_cross_property('led_bit', '')
+if led_ioport != ''
+  add_project_arguments(
+      '-DLED_IOPORT_NAME=' + led_ioport,
+      '-DLED_BIT=' + led_bit,
+      language: 'c',
+  )
+endif
 
 add_project_link_arguments(
     '-mmcu=' + host_machine.cpu(),
