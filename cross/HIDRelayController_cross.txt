@@ -26,6 +26,10 @@ relay_driver = 'simple'
 # be PIN 0, Relay 2 must be PIN 1, etc.
 relay_ioport = 'A'
 
+# The starting bit for the relays in the I/O port (if less than 8). Defaults
+# to 0 if unspecified
+#relay_offset = 0
+
 # The ioport on which the LED is connected
 led_ioport = 'B'
 

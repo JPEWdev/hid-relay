@@ -3,8 +3,8 @@
  *
  * SPDX-License-Identifier: GPL-2.0
  *
- * Simple relay driver that assumes all relays are on a single I/O starting at
- * pin 0 and moving linearly from there
+ * Simple relay driver that assumes all relays are contiguous in a single I/O
+ * port
  */
 #include <avr/io.h>
 #include <stdbool.h>
@@ -18,7 +18,7 @@
 #define RELAY_PORT concat(PORT, RELAY_IOPORT_NAME)
 #define RELAY_PIN concat(PIN, RELAY_IOPORT_NAME)
 #define RELAY_DDR concat(DDR, RELAY_IOPORT_NAME)
-#define RELAY_MASK ((1 << NUM_RELAYS) - 1)
+#define RELAY_MASK (((1 << NUM_RELAYS) - 1) << RELAY_OFFSET)
 
 void init_relays(void) {
     RELAY_DDR |= RELAY_MASK;
@@ -44,10 +44,12 @@ void set_all_relays(bool on) {
 
 void set_relay(uint8_t relay, bool on) {
     if (on) {
-        RELAY_PORT |= _BV(relay);
+        RELAY_PORT |= _BV(relay + RELAY_OFFSET);
     } else {
-        RELAY_PORT &= ~_BV(relay);
+        RELAY_PORT &= ~_BV(relay + RELAY_OFFSET);
     }
 }
 
-uint8_t get_relay_state(void) { return RELAY_PORT; }
+uint8_t get_relay_state(void) {
+    return (RELAY_PORT & RELAY_MASK) >> RELAY_OFFSET;
+}
