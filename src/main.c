@@ -45,8 +45,9 @@ PROGMEM const char usbHidReportDescriptor[] = {
     // clang-format on
 };
 _Static_assert(sizeof(usbHidReportDescriptor) ==
-               USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH);
-
+                   USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH,
+               "usbHidReportDescriptor length does not match "
+               "USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH");
 uint8_t buf[8];
 uint8_t buf_len;
 

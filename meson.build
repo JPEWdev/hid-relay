@@ -6,7 +6,8 @@ project('HIDRelay', 'c',
     'cpp_rtti=false',
     'cpp_eh_=none',
     'werror=true',
-    'c_std=c99',
+    'warning_level=3',
+    'c_std=c11',
   ]
 )
 
