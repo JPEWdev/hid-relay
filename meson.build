@@ -17,6 +17,7 @@ usb_dminus_bit = meson.get_cross_property('usb_dminus_bit')
 usb_dplus_bit = meson.get_cross_property('usb_dplus_bit')
 num_relays = meson.get_cross_property('num_relays')
 relay_ioport = meson.get_cross_property('relay_ioport')
+enable_watchdog = meson.get_cross_property('enable_watchdog', true)
 
 assert(num_relays.to_int() >= 1 and num_relays.to_int() <= 8, 'num_relays must be in the range [1..8]')
 
@@ -34,6 +35,7 @@ add_project_arguments(
     '-DUSB_CFG_DPLUS_BIT=' + usb_dplus_bit,
     '-DNUM_RELAYS=' + num_relays,
     '-DREPORT_SERIAL=' + (get_option('usb_serial_id') ? '1' : '0'),
+    '-DENABLE_WATCHDOG=' + (enable_watchdog ? '1' : '0'),
     language: 'c',
 )
 

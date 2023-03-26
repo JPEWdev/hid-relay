@@ -199,13 +199,17 @@ int main(void) {
     set_ram_serial(buf);
 #endif
 
+#if ENABLE_WATCHDOG
     wdt_enable(WDTO_1S);
+#endif
 
     odDebugInit();
     usbInit();
     usbDeviceDisconnect();
     for (uint8_t i = 0; i < 250; i++) {
+#if ENABLE_WATCHDOG
         wdt_reset();
+#endif
         _delay_ms(1);
     }
 
@@ -213,7 +217,9 @@ int main(void) {
     sei();
 
     while (true) {
+#if ENABLE_WATCHDOG
         wdt_reset();
+#endif
         usbPoll();
     }
 }

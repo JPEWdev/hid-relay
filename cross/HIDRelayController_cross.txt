@@ -49,6 +49,10 @@ usb_dminus_bit = '3'
 # markers every millisecond.]
 usb_dplus_bit = '6'
 
+# Enable the reset watchdog (defaults to true if unspecified). Turning off
+# will save some space on constrained devices
+enable_watchdog = false
+
 # FUSES:
 #
 #	N = Unprogrammed(1)
