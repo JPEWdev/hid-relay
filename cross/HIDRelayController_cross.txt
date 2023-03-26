@@ -69,7 +69,7 @@ enable_watchdog = false
 # 7		CKDIV=N		RSTDISBL=N
 # 6		CKOUT=N		DWEN=N
 # 5		SUT1=N		SPIEN=Y
-# 4		SUT0=N		WDTON=Y
+# 4		SUT0=N		WDTON=N
 # 3		CKSEL3=N	EESAVE=N
 # 2		CKSEL2=N	BODLEVEL2=N
 # 1		CKSEL1=N	BODLEVEL1=Y
@@ -77,7 +77,7 @@ enable_watchdog = false
 #
 # http://www.engbedded.com/fusecalc/
 lfuse = '0xff'
-hfuse = '0xcb'
+hfuse = '0xdb'
 efuse = '0xff'
 
 [host_machine]
