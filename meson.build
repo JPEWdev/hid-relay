@@ -2,6 +2,7 @@ project('HIDRelay', 'c',
   default_options: [
     'buildtype=minsize',
     'b_lto=false',
+    'b_staticpic=false',
     'cpp_rtti=false',
     'cpp_eh_=none',
     'werror=true',
@@ -16,7 +17,6 @@ usb_ioport = meson.get_cross_property('usb_ioport')
 usb_dminus_bit = meson.get_cross_property('usb_dminus_bit')
 usb_dplus_bit = meson.get_cross_property('usb_dplus_bit')
 num_relays = meson.get_cross_property('num_relays')
-relay_ioport = meson.get_cross_property('relay_ioport')
 enable_watchdog = meson.get_cross_property('enable_watchdog', true)
 
 assert(num_relays.to_int() >= 1 and num_relays.to_int() <= 8, 'num_relays must be in the range [1..8]')
@@ -29,7 +29,6 @@ add_project_arguments(
     '-funsigned-char',
     '-mmcu=' + host_machine.cpu(),
     '-DF_CPU=' + cpu_speed + 'UL',
-    '-DRELAY_IOPORT_NAME=' + relay_ioport,
     '-DUSB_CFG_IOPORTNAME=' + usb_ioport,
     '-DUSB_CFG_DMINUS_BIT=' + usb_dminus_bit,
     '-DUSB_CFG_DPLUS_BIT=' + usb_dplus_bit,
@@ -59,6 +58,10 @@ add_project_link_arguments(
     language: 'c',
 )
 
+include_dir = include_directories('include')
+
+relay_driver = meson.get_cross_property('relay_driver')
+subdir('src/drivers/' + relay_driver)
 
 program = executable('hidrelay', [
     'src/main.c',
@@ -66,7 +69,11 @@ program = executable('hidrelay', [
     'usbdrv/usbdrvasm.S',
     'usbdrv/oddebug.c',
   ],
-  include_directories: include_directories('src', 'usbdrv'),
+  link_with: libdriver,
+  include_directories: [
+    include_directories('src', 'usbdrv'),
+    include_dir,
+  ],
   link_args: [
     '-Wl,-Map,@0@/hidrelay.map'.format(meson.current_build_dir()),
   ]

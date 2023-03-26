@@ -3,6 +3,8 @@
  *
  * SPDX-License-Identifier: GPL-2.0
  */
+#include "main.h"
+
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -24,17 +26,9 @@
 #define LED_MASK _BV(LED_BIT)
 #endif
 
-#define RELAY_PORT concat(PORT, RELAY_IOPORT_NAME)
-#define RELAY_PIN concat(PIN, RELAY_IOPORT_NAME)
-#define RELAY_DDR concat(DDR, RELAY_IOPORT_NAME)
-#define RELAY_MASK ((1 << NUM_RELAYS) - 1)
-
 #define USB_HID_REPORT_TYPE_FEATURE 3
 #define GET_REPORT 1
 #define SET_REPORT 9
-
-uint8_t relay_state;
-#define set_relays() (RELAY_PORT = (RELAY_PORT & ~RELAY_MASK) | relay_state)
 
 PROGMEM const char usbHidReportDescriptor[] = {
     // clang-format off
@@ -75,25 +69,6 @@ void set_serial(uint8_t const *data) {
 #endif
 }
 
-void set_all_relays(bool on) {
-    relay_state = on ? RELAY_MASK : 0x00;
-    set_relays();
-}
-
-void set_relay(uint8_t relay, bool on) {
-    if (relay >= NUM_RELAYS) {
-        return;
-    }
-
-    if (on) {
-        relay_state |= _BV(relay);
-    } else {
-        relay_state &= ~_BV(relay);
-    }
-
-    set_relays();
-}
-
 uchar usbFunctionWrite(uchar *data, uchar len) {
     if (buf_len + len >= sizeof(buf)) {
         len = sizeof(buf) - buf_len;
@@ -121,7 +96,9 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 
         case 0xFD:
             if (buf_len >= 2) {
-                set_relay(buf[1], false);
+                if (buf[1] < NUM_RELAYS) {
+                    set_relay(buf[1], false);
+                }
                 return 1;
             }
             break;
@@ -133,7 +110,9 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 
         case 0xFF:
             if (buf_len >= 2) {
-                set_relay(buf[1], true);
+                if (buf[1] < NUM_RELAYS) {
+                    set_relay(buf[1], true);
+                }
                 return 1;
             }
             break;
@@ -152,7 +131,7 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
                 rq->wValue.bytes[1] == USB_HID_REPORT_TYPE_FEATURE) {
                 eeprom_read_block(buf, serial, sizeof(serial));
                 buf[6] = 0;
-                buf[7] = relay_state;
+                buf[7] = get_relay_state();
 
                 usbMsgPtr = buf;
 
@@ -179,13 +158,7 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 }
 
 int main(void) {
-    RELAY_DDR |= RELAY_MASK;
-#if NUM_RELAYS == 8
-    RELAY_PORT = 0;
-#else
-    RELAY_PORT &= ~RELAY_MASK;
-#endif
-    relay_state = 0;
+    init_relays();
 
 #ifdef LED_IOPORT_NAME
     LED_DDR |= LED_MASK;

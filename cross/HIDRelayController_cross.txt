@@ -19,6 +19,9 @@ avrdude_speed = '1.1'
 # Number of relays. Must be in the range [1..8]
 num_relays = '8'
 
+# Controls which driver is used to set the relays. See: src/drivers/
+relay_driver = 'simple'
+
 # The port on which the relays are connected. The first relay (Relay 1) must
 # be PIN 0, Relay 2 must be PIN 1, etc.
 relay_ioport = 'A'
