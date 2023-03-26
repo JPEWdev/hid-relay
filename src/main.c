@@ -30,6 +30,13 @@
 #define GET_REPORT 1
 #define SET_REPORT 9
 
+#define CMD_SET_SERIAL 0xFA
+#define CMD_ON 0xFF
+#define CMD_OFF 0xFD
+
+#define CMD_ALL_ON 0xFE
+#define CMD_ALL_OFF 0xFC
+
 PROGMEM const char usbHidReportDescriptor[] = {
     // clang-format off
     0x06, 0x00, 0xFF,  // Usage Page (Vendor Defined 0xFF00)
@@ -83,36 +90,26 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
     buf_len += len;
 
     switch (buf[0]) {
-        case 0xFA:
+        case CMD_SET_SERIAL:
             if (buf_len == 8) {
                 set_serial(buf);
                 return 1;
             }
             break;
 
-        case 0xFC:
+        case CMD_ALL_OFF:
             set_all_relays(false);
             return 1;
-            break;
 
-        case 0xFD:
-            if (buf_len >= 2) {
-                if (buf[1] > 0 && buf[1] <= NUM_RELAYS) {
-                    set_relay(buf[1] - 1, false);
-                }
-                return 1;
-            }
-            break;
-
-        case 0xFE:
+        case CMD_ALL_ON:
             set_all_relays(true);
             return 1;
-            break;
 
-        case 0xFF:
+        case CMD_ON:
+        case CMD_OFF:
             if (buf_len >= 2) {
-                if (buf[1] > 0 && buf[1] <= NUM_RELAYS) {
-                    set_relay(buf[1] - 1, true);
+                if (buf[1] >= 1 && buf[1] <= NUM_RELAYS) {
+                    set_relay(buf[1] - 1, buf[0] == CMD_ON);
                 }
                 return 1;
             }
