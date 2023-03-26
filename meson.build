@@ -19,7 +19,10 @@ usb_dplus_bit = meson.get_cross_property('usb_dplus_bit')
 num_relays = meson.get_cross_property('num_relays')
 enable_watchdog = meson.get_cross_property('enable_watchdog', true)
 
-assert(num_relays.to_int() >= 1 and num_relays.to_int() <= 8, 'num_relays must be in the range [1..8]')
+assert(usb_ioport in ['A', 'B', 'C', 'D'], '"@0@" is not a valid I/O port'.format(usb_ioport))
+assert(num_relays >= 1 and num_relays <= 8, 'num_relays must be in the range [1..8]')
+assert(usb_dminus_bit >= 0 and usb_dminus_bit <= 7, '@0@ is not a valid port bit'.format(usb_dminus_bit))
+assert(usb_dplus_bit >= 0 and usb_dplus_bit <= 7, '@0@ is not a valid port bit'.format(usb_dplus_bit))
 
 add_project_arguments(
 	'--param=min-pagesize=0',
@@ -28,22 +31,25 @@ add_project_arguments(
 	'-funsigned-bitfields',
     '-funsigned-char',
     '-mmcu=' + host_machine.cpu(),
-    '-DF_CPU=' + cpu_speed + 'UL',
+    '-DF_CPU=' + cpu_speed.to_string() + 'UL',
     '-DUSB_CFG_IOPORTNAME=' + usb_ioport,
-    '-DUSB_CFG_DMINUS_BIT=' + usb_dminus_bit,
-    '-DUSB_CFG_DPLUS_BIT=' + usb_dplus_bit,
-    '-DNUM_RELAYS=' + num_relays,
+    '-DUSB_CFG_DMINUS_BIT=' + usb_dminus_bit.to_string(),
+    '-DUSB_CFG_DPLUS_BIT=' + usb_dplus_bit.to_string(),
+    '-DNUM_RELAYS=' + num_relays.to_string(),
     '-DREPORT_SERIAL=' + (get_option('usb_serial_id') ? '1' : '0'),
     '-DENABLE_WATCHDOG=' + (enable_watchdog ? '1' : '0'),
     language: 'c',
 )
 
 led_ioport = meson.get_cross_property('led_ioport', '')
-led_bit = meson.get_cross_property('led_bit', '')
 if led_ioport != ''
+  led_bit = meson.get_cross_property('led_bit')
+  assert(led_ioport in ['A', 'B', 'C', 'D'], '"@0@" is not a valid I/O port'.format(led_ioport))
+  assert(led_bit >= 0 and led_bit <= 7, '@0@ is not a valid port bit'.format(led_bit))
+
   add_project_arguments(
       '-DLED_IOPORT_NAME=' + led_ioport,
-      '-DLED_BIT=' + led_bit,
+      '-DLED_BIT=' + led_bit.to_string(),
       language: 'c',
   )
 endif
