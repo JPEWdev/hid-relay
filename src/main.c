@@ -97,8 +97,8 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 
         case 0xFD:
             if (buf_len >= 2) {
-                if (buf[1] < NUM_RELAYS) {
-                    set_relay(buf[1], false);
+                if (buf[1] > 0 && buf[1] <= NUM_RELAYS) {
+                    set_relay(buf[1] - 1, false);
                 }
                 return 1;
             }
@@ -111,8 +111,8 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 
         case 0xFF:
             if (buf_len >= 2) {
-                if (buf[1] < NUM_RELAYS) {
-                    set_relay(buf[1], true);
+                if (buf[1] > 0 && buf[1] <= NUM_RELAYS) {
+                    set_relay(buf[1] - 1, true);
                 }
                 return 1;
             }
