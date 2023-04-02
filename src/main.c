@@ -93,7 +93,7 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
     switch (buf[0]) {
         case CMD_SET_SERIAL:
             if (buf_len == 8) {
-                set_serial(buf);
+                set_serial(&buf[1]);
                 return 1;
             }
             break;
