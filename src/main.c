@@ -58,20 +58,21 @@ _Static_assert(sizeof(usbHidReportDescriptor) ==
 uint8_t buf[8];
 uint8_t buf_len;
 
-uint8_t EEMEM serial[6] = {'J', 'P', 'E', 'W', ' ', ' '};
+uint8_t EEMEM serial[] = {'J', 'P', 'E', 'W', '0'};
+_Static_assert(sizeof(serial) == SERIAL_LEN, "Invalid serial number length");
 
 #if REPORT_SERIAL
-int usbDescriptorStringSerialNumber[1 + sizeof(serial)];
+int usbDescriptorStringSerialNumber[1 + SERIAL_LEN];
 
 void set_ram_serial(uint8_t const *data) {
-    for (uint8_t i = 0; i < sizeof(serial); i++) {
+    for (uint8_t i = 0; i < SERIAL_LEN; i++) {
         usbDescriptorStringSerialNumber[i + 1] = data[i];
     }
 }
 #endif
 
 void set_serial(uint8_t const *data) {
-    eeprom_write_block(data, serial, sizeof(serial));
+    eeprom_write_block(data, serial, SERIAL_LEN);
 #if REPORT_SERIAL
     set_ram_serial(data);
 #endif
@@ -127,7 +128,7 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
         if (rq->bRequest == GET_REPORT) {
             if (rq->wValue.bytes[0] == 0 &&
                 rq->wValue.bytes[1] == USB_HID_REPORT_TYPE_FEATURE) {
-                eeprom_read_block(buf, serial, sizeof(serial));
+                eeprom_read_block(buf, serial, SERIAL_LEN);
                 buf[6] = 0;
                 buf[7] = get_relay_state();
 
@@ -165,8 +166,8 @@ int main(void) {
 
 #if REPORT_SERIAL
     usbDescriptorStringSerialNumber[0] =
-        USB_STRING_DESCRIPTOR_HEADER(sizeof(serial));
-    eeprom_read_block(buf, serial, sizeof(serial));
+        USB_STRING_DESCRIPTOR_HEADER(SERIAL_LEN);
+    eeprom_read_block(buf, serial, SERIAL_LEN);
     set_ram_serial(buf);
 #endif
 

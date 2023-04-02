@@ -344,6 +344,8 @@ section at the end of this file).
  * };
  */
 
+#define SERIAL_LEN (5)
+
 #define USB_CFG_DESCR_PROPS_DEVICE                  0
 #define USB_CFG_DESCR_PROPS_CONFIGURATION           0
 #define USB_CFG_DESCR_PROPS_STRINGS                 0
@@ -351,7 +353,7 @@ section at the end of this file).
 #define USB_CFG_DESCR_PROPS_STRING_VENDOR           0
 #define USB_CFG_DESCR_PROPS_STRING_PRODUCT          0
 #if REPORT_SERIAL
-#define USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER    (USB_PROP_IS_RAM | USB_PROP_LENGTH(6))
+#define USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER    (USB_PROP_IS_RAM | USB_PROP_LENGTH((SERIAL_LEN + 1) * 2))
 #else
 #define USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER    0
 #endif
