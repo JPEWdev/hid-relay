@@ -123,7 +123,7 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 usbMsgLen_t usbFunctionSetup(uchar data[8]) {
     usbRequest_t *rq = (void *)data;
 
-    if ((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_VENDOR) {
+    if ((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS) {
         DBG1(0x50, &rq->bRequest, 1); /* debug output: print our request */
         if (rq->bRequest == GET_REPORT) {
             if (rq->wValue.bytes[0] == 0 &&
