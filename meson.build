@@ -135,7 +135,7 @@ run_target('writeflash',
 
 lfuse = meson.get_cross_property('lfuse')
 hfuse = meson.get_cross_property('hfuse')
-efuse = meson.get_cross_property('efuse')
+efuse = meson.get_cross_property('efuse', '')
 
 
 # NOTE: We write the fuses at a slower speed because on
@@ -150,8 +150,7 @@ run_target('writefuses',
     '-B', '100',
 	'-U', 'lfuse:w:' + lfuse + ':m',
 	'-U', 'hfuse:w:' + hfuse + ':m',
-	'-U', 'efuse:w:' + efuse + ':m',
-  ]
+  ] + (efuse != '' ? ['-U', 'efuse:w:' + efuse + ':m'] : []),
 )
 
 run_target('readfuses',
@@ -163,8 +162,7 @@ run_target('readfuses',
 	'-B', avrdude_speed,
 	'-U', 'lfuse:r:-:h',
 	'-U', 'hfuse:r:-:h',
-	'-U', 'efuse:r:-:h',
-  ]
+  ] + (efuse != '' ? ['-U', 'efuse:r:-:h'] : []),
 )
 
 run_target('readeeprom',
