@@ -19,7 +19,23 @@ avrdude_speed = '1.1'
 num_relays = 8
 
 # Controls which driver is used to set the relays. See: src/drivers/
-relay_driver = 'dcttech'
+relay_driver = 'alacarte'
+relay_1_ioport = 'D'
+relay_1_bit = 1
+relay_2_ioport = 'D'
+relay_2_bit = 0
+relay_3_ioport = 'C'
+relay_3_bit = 5
+relay_4_ioport = 'C'
+relay_4_bit = 4
+relay_5_ioport = 'C'
+relay_5_bit = 3
+relay_6_ioport = 'C'
+relay_6_bit = 2
+relay_7_ioport = 'C'
+relay_7_bit = 1
+relay_8_ioport = 'C'
+relay_8_bit = 0
 
 # The speed of the CPU clock, in Hz
 cpu_speed = 12000000

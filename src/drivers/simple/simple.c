@@ -4,7 +4,10 @@
  * SPDX-License-Identifier: GPL-2.0
  *
  * Simple relay driver that assumes all relays are contiguous in a single I/O
- * port
+ * port. This is the mode code efficient and fastest driver. It is recommended
+ * to design your hardware to use this driver if possible.
+ *
+ * If not, see the "alacarte" driver
  */
 #include <avr/io.h>
 #include <stdbool.h>
