@@ -65,133 +65,132 @@ _Static_assert(sizeof(serial) == SERIAL_LEN, "Invalid serial number length");
 int usbDescriptorStringSerialNumber[1 + SERIAL_LEN];
 
 void set_ram_serial(uint8_t const *data) {
-    for (uint8_t i = 0; i < SERIAL_LEN; i++) {
-        usbDescriptorStringSerialNumber[i + 1] = data[i];
-    }
+  for (uint8_t i = 0; i < SERIAL_LEN; i++) {
+    usbDescriptorStringSerialNumber[i + 1] = data[i];
+  }
 }
 #endif
 
 void set_serial(uint8_t const *data) {
-    eeprom_write_block(data, serial, SERIAL_LEN);
+  eeprom_write_block(data, serial, SERIAL_LEN);
 #if REPORT_SERIAL
-    set_ram_serial(data);
+  set_ram_serial(data);
 #endif
 }
 
 uchar usbFunctionWrite(uchar *data, uchar len) {
-    if (buf_len + len >= sizeof(buf)) {
-        len = sizeof(buf) - buf_len;
+  if (buf_len + len >= sizeof(buf)) {
+    len = sizeof(buf) - buf_len;
+  }
+
+  if (len == 0) {
+    return 0xff;
+  }
+
+  memcpy(&buf[buf_len], data, len);
+  buf_len += len;
+
+  switch (buf[0]) {
+  case CMD_SET_SERIAL:
+    if (buf_len == 8) {
+      set_serial(&buf[1]);
+      return 1;
     }
+    break;
 
-    if (len == 0) {
-        return 0xff;
+  case CMD_ALL_OFF:
+    set_all_relays(false);
+    return 1;
+
+  case CMD_ALL_ON:
+    set_all_relays(true);
+    return 1;
+
+  case CMD_ON:
+  case CMD_OFF:
+    if (buf_len >= 2) {
+      if (buf[1] >= 1 && buf[1] <= NUM_RELAYS) {
+        set_relay(buf[1] - 1, buf[0] == CMD_ON);
+      }
+      return 1;
     }
+    break;
+  }
 
-    memcpy(&buf[buf_len], data, len);
-    buf_len += len;
-
-    switch (buf[0]) {
-        case CMD_SET_SERIAL:
-            if (buf_len == 8) {
-                set_serial(&buf[1]);
-                return 1;
-            }
-            break;
-
-        case CMD_ALL_OFF:
-            set_all_relays(false);
-            return 1;
-
-        case CMD_ALL_ON:
-            set_all_relays(true);
-            return 1;
-
-        case CMD_ON:
-        case CMD_OFF:
-            if (buf_len >= 2) {
-                if (buf[1] >= 1 && buf[1] <= NUM_RELAYS) {
-                    set_relay(buf[1] - 1, buf[0] == CMD_ON);
-                }
-                return 1;
-            }
-            break;
-    }
-
-    return 0;
+  return 0;
 }
 
 usbMsgLen_t usbFunctionSetup(uchar data[8]) {
-    usbRequest_t *rq = (void *)data;
+  usbRequest_t *rq = (void *)data;
 
-    if ((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS) {
-        DBG1(0x50, &rq->bRequest, 1); /* debug output: print our request */
-        if (rq->bRequest == GET_REPORT) {
-            if (rq->wValue.bytes[0] == 0 &&
-                rq->wValue.bytes[1] == USB_HID_REPORT_TYPE_FEATURE) {
-                eeprom_read_block(buf, serial, SERIAL_LEN);
-                buf[6] = 0;
-                buf[7] = get_relay_state();
+  if ((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS) {
+    DBG1(0x50, &rq->bRequest, 1); /* debug output: print our request */
+    if (rq->bRequest == GET_REPORT) {
+      if (rq->wValue.bytes[0] == 0 &&
+          rq->wValue.bytes[1] == USB_HID_REPORT_TYPE_FEATURE) {
+        eeprom_read_block(buf, serial, SERIAL_LEN);
+        buf[6] = 0;
+        buf[7] = get_relay_state();
 
-                usbMsgPtr = buf;
+        usbMsgPtr = buf;
 
-                return 8;
-            }
+        return 8;
+      }
 
-        } else if (rq->bRequest == SET_REPORT) {
-            if (rq->wValue.bytes[0] == 0 &&
-                rq->wValue.bytes[1] == USB_HID_REPORT_TYPE_FEATURE) {
-                memset(buf, 0, sizeof(buf));
-                buf_len = 0;
+    } else if (rq->bRequest == SET_REPORT) {
+      if (rq->wValue.bytes[0] == 0 &&
+          rq->wValue.bytes[1] == USB_HID_REPORT_TYPE_FEATURE) {
+        memset(buf, 0, sizeof(buf));
+        buf_len = 0;
 
-                return USB_NO_MSG;
-            }
-        }
-    } else {
-        /* class requests USBRQ_HID_GET_REPORT and USBRQ_HID_SET_REPORT are
-         * not implemented since we never call them. The operating system
-         * won't call them either because our descriptor defines no meaning.
-         */
+        return USB_NO_MSG;
+      }
     }
-    return 0; /* default for not implemented requests: return no data back to
-                 host */
+  } else {
+    /* class requests USBRQ_HID_GET_REPORT and USBRQ_HID_SET_REPORT are
+     * not implemented since we never call them. The operating system
+     * won't call them either because our descriptor defines no meaning.
+     */
+  }
+  return 0; /* default for not implemented requests: return no data back to
+               host */
 }
 
 int main(void) {
-    init_relays();
+  init_relays();
 
 #ifdef LED_IOPORT_NAME
-    LED_DDR |= LED_MASK;
-    LED_PORT &= ~LED_MASK;
+  LED_DDR |= LED_MASK;
+  LED_PORT &= ~LED_MASK;
 #endif
 
 #if REPORT_SERIAL
-    usbDescriptorStringSerialNumber[0] =
-        USB_STRING_DESCRIPTOR_HEADER(SERIAL_LEN);
-    eeprom_read_block(buf, serial, SERIAL_LEN);
-    set_ram_serial(buf);
+  usbDescriptorStringSerialNumber[0] = USB_STRING_DESCRIPTOR_HEADER(SERIAL_LEN);
+  eeprom_read_block(buf, serial, SERIAL_LEN);
+  set_ram_serial(buf);
 #endif
 
 #if ENABLE_WATCHDOG
-    wdt_enable(WDTO_1S);
+  wdt_enable(WDTO_1S);
 #endif
 
-    odDebugInit();
-    usbInit();
-    usbDeviceDisconnect();
-    for (uint8_t i = 0; i < 250; i++) {
+  odDebugInit();
+  usbInit();
+  usbDeviceDisconnect();
+  for (uint8_t i = 0; i < 250; i++) {
 #if ENABLE_WATCHDOG
-        wdt_reset();
+    wdt_reset();
 #endif
-        _delay_ms(1);
-    }
+    _delay_ms(1);
+  }
 
-    usbDeviceConnect();
-    sei();
+  usbDeviceConnect();
+  sei();
 
-    while (true) {
+  while (true) {
 #if ENABLE_WATCHDOG
-        wdt_reset();
+    wdt_reset();
 #endif
-        usbPoll();
-    }
+    usbPoll();
+  }
 }

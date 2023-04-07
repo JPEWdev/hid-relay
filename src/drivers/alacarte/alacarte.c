@@ -21,19 +21,20 @@
 #define threecat(a, b, c) _threecat(a, b, c)
 
 #define INIT_RELAY(n) threecat(RELAY_, n, _DDR) |= threecat(RELAY_, n, _MASK);
-#define SET_RELAY(n)                                                   \
-    if (relay == n - 1) {                                              \
-        if (on) {                                                      \
-            threecat(RELAY_, n, _PORT) |= threecat(RELAY_, n, _MASK);  \
-        } else {                                                       \
-            threecat(RELAY_, n, _PORT) &= ~threecat(RELAY_, n, _MASK); \
-        }                                                              \
-    }
 
-#define GET_RELAY(n)                                               \
-    if (threecat(RELAY_, n, _PORT) & threecat(RELAY_, n, _MASK)) { \
-        state |= _BV(n - 1);                                       \
-    }
+#define SET_RELAY(n)                                                           \
+  if (relay == n - 1) {                                                        \
+    if (on) {                                                                  \
+      threecat(RELAY_, n, _PORT) |= threecat(RELAY_, n, _MASK);                \
+    } else {                                                                   \
+      threecat(RELAY_, n, _PORT) &= ~threecat(RELAY_, n, _MASK);               \
+    }                                                                          \
+  }
+
+#define GET_RELAY(n)                                                           \
+  if (threecat(RELAY_, n, _PORT) & threecat(RELAY_, n, _MASK)) {               \
+    state |= _BV(n - 1);                                                       \
+  }
 
 #define RELAY_1_PORT concat(PORT, RELAY_1_IOPORT_NAME)
 #define RELAY_1_DDR concat(DDR, RELAY_1_IOPORT_NAME)
@@ -133,33 +134,32 @@
 #define SET_RELAY_8()
 #endif
 
-#define DO_RELAY(action)        \
-    concat(action, _RELAY_1)(); \
-    concat(action, _RELAY_2)(); \
-    concat(action, _RELAY_3)(); \
-    concat(action, _RELAY_4)(); \
-    concat(action, _RELAY_5)(); \
-    concat(action, _RELAY_6)(); \
-    concat(action, _RELAY_7)(); \
-    concat(action, _RELAY_8)();
+#define DO_RELAY(action)                                                       \
+  concat(action, _RELAY_1)();                                                  \
+  concat(action, _RELAY_2)();                                                  \
+  concat(action, _RELAY_3)();                                                  \
+  concat(action, _RELAY_4)();                                                  \
+  concat(action, _RELAY_5)();                                                  \
+  concat(action, _RELAY_6)();                                                  \
+  concat(action, _RELAY_7)();                                                  \
+  concat(action, _RELAY_8)();
 
 void init_relays(void) {
-    DO_RELAY(INIT)
-    set_all_relays(false);
+  DO_RELAY(INIT)
+  set_all_relays(false);
 }
 
 void set_all_relays(bool on) {
-    for (uint8_t i = 0; i < NUM_RELAYS; i++) {
-        set_relay(i, on);
-    }
+  for (uint8_t i = 0; i < NUM_RELAYS; i++) {
+    set_relay(i, on);
+  }
 }
 
 void set_relay(uint8_t relay, bool on) { DO_RELAY(SET); }
 
 uint8_t get_relay_state(void) {
-    uint8_t state = 0;
+  uint8_t state = 0;
 
-    DO_RELAY(GET);
-    return state;
+  DO_RELAY(GET);
+  return state;
 }
-
