@@ -1,0 +1,5 @@
+[host_machine]
+system = 'baremetal'
+cpu_family = 'avr'
+cpu = 'attiny461'
+endian = 'little'

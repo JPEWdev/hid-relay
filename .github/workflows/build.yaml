@@ -10,9 +10,26 @@ jobs:
     runs-on: Ubuntu-22.04
     strategy:
       matrix:
-        device:
-          - HIDRelayController
-          - dcttech_8ch
+        include:
+          - name: HIDRelayController attiny261
+            cross:
+              - cross/HIDRelayController_cross.txt
+              - cross/attiny261_cross.txt
+
+          - name: HIDRelayController attiny461
+            cross:
+              - cross/HIDRelayController_cross.txt
+              - cross/attiny461_cross.txt
+
+          - name: HIDRelayController attiny861
+            cross:
+              - cross/HIDRelayController_cross.txt
+              - cross/attiny861_cross.txt
+
+          - name: dcttech 8 channel
+            cross:
+              - cross/dcttech_8ch_cross.txt
+
     steps:
       - name: Checkout
         uses: actions/checkout@master
@@ -24,22 +41,22 @@ jobs:
         run: |
           sudo apt install -y gcc-avr binutils-avr avr-libc avrdude meson clang-format
 
-      - name: Configure ${{ matrix.device }}
+      - name: Configure ${{ matrix.name }}
         run: |
-          meson setup --cross-file cross/${{ matrix.device }}_cross.txt build
+          meson setup --cross-file=${{ join( matrix.cross, ' --cross-file=') }} builddir
 
       - name: Check formatting
         run: |
-          ninja -C build clang-format-check
+          ninja -C builddir clang-format-check
 
-      - name: Build ${{ matrix.device }}
+      - name: Build ${{ matrix.name }}
         run: |
-          ninja -C build
+          ninja -C builddir
 
-      - name: Create hex files for ${{ matrix.device }}
+      - name: Create hex files for ${{ matrix.name }}
         run: |
-          ninja -C build hidrelay.hex hidrelay.ee.hex
+          ninja -C builddir hidrelay.hex hidrelay.ee.hex
 
-      - name: Show stats for ${{ matrix.device }}
+      - name: Show stats for ${{ matrix.name }}
         run: |
-          ninja -C build stats
+          ninja -C builddir stats
