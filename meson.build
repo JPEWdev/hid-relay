@@ -147,6 +147,22 @@ hfuse = meson.get_cross_property('hfuse')
 efuse = meson.get_cross_property('efuse', '')
 
 
+python3 = find_program('python3')
+
+custom_target('fuse-config',
+  input: 'scripts/gen_fuses.py',
+  output: 'fuses.txt',
+  command: [
+    python3,
+    '@INPUT@',
+    '--cpu', host_machine.cpu(),
+    '--lfuse', lfuse,
+    '--hfuse', hfuse,
+    '--efuse', efuse,
+    '--output', '@OUTPUT@'
+  ]
+)
+
 # NOTE: We write the fuses at a slower speed because on
 # new devices, the external clock is not configured yet so
 # the high speed transfer fails
