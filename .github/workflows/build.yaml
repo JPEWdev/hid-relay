@@ -22,11 +22,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt install -y gcc-avr binutils-avr avr-libc avrdude meson
+          sudo apt install -y gcc-avr binutils-avr avr-libc avrdude meson clang-format
 
       - name: Configure ${{ matrix.device }}
         run: |
           meson setup --cross-file cross/${{ matrix.device }}_cross.txt build
+
+      - name: Check formatting
+        run: |
+          ninja -C build clang-format-check
 
       - name: Build ${{ matrix.device }}
         run: |
