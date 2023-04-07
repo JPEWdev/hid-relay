@@ -1,0 +1,41 @@
+---
+name: build
+run-name: Build
+on:
+  pull_request: {}
+  push: {}
+jobs:
+  build:
+    name: Build Firmware
+    runs-on: Ubuntu-22.04
+    strategy:
+      matrix:
+        device:
+          - HIDRelayController
+          - dcttech_8ch
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Update apt
+        run: sudo apt update -y
+
+      - name: Install Dependencies
+        run: |
+          sudo apt install -y gcc-avr binutils-avr avr-libc avrdude meson
+
+      - name: Configure ${{ matrix.device }}
+        run: |
+          meson setup --cross-file cross/${{ matrix.device }}_cross.txt build
+
+      - name: Build ${{ matrix.device }}
+        run: |
+          ninja -C build
+
+      - name: Create hex files for ${{ matrix.device }}
+        run: |
+          ninja -C build hidrelay.hex hidrelay.ee.hex
+
+      - name: Show stats for ${{ matrix.device }}
+        run: |
+          ninja -C build stats

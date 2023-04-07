@@ -26,7 +26,6 @@ assert(usb_dminus_bit >= 0 and usb_dminus_bit <= 7, '@0@ is not a valid port bit
 assert(usb_dplus_bit >= 0 and usb_dplus_bit <= 7, '@0@ is not a valid port bit'.format(usb_dplus_bit))
 
 add_project_arguments(
-	'--param=min-pagesize=0',
     '-fpack-struct',
     '-fshort-enums',
 	'-funsigned-bitfields',
@@ -41,6 +40,16 @@ add_project_arguments(
     '-DENABLE_WATCHDOG=' + (enable_watchdog ? '1' : '0'),
     language: 'c',
 )
+
+c_compiler = meson.get_compiler('c')
+
+# Needed to work around a bug in newer versions of avr-gcc
+if c_compiler.has_argument('--param=min-pagesize=0')
+  add_project_arguments(
+      '--param=min-pagesize=0',
+      language: 'c',
+  )
+endif
 
 led_ioport = meson.get_cross_property('led_ioport', '')
 if led_ioport != ''
