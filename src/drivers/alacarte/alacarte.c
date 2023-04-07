@@ -20,33 +20,36 @@
 #define _threecat(a, b, c) a##b##c
 #define threecat(a, b, c) _threecat(a, b, c)
 
-#define INIT_RELAY(n) threecat(RELAY_, n, _DDR) |= threecat(RELAY_, n, _MASK);
+#define DDRn(n) concat(DDR, n)
+#define PORTn(n) concat(PORT, n)
+
+#define RELAY_IOPORT_NAME(n) threecat(RELAY_, n, _IOPORT_NAME)
+
+#define RELAY_DDR(n) DDRn(RELAY_IOPORT_NAME(n))
+#define RELAY_PORT(n) PORTn(RELAY_IOPORT_NAME(n))
+#define RELAY_MASK(n) (1 << threecat(RELAY_, n, _BIT))
+
+#define INIT_RELAY(n) RELAY_DDR(n) |= RELAY_MASK(n)
 
 #define SET_RELAY(n)                                                           \
   if (relay == n - 1) {                                                        \
     if (on) {                                                                  \
-      threecat(RELAY_, n, _PORT) |= threecat(RELAY_, n, _MASK);                \
+      RELAY_PORT(n) |= RELAY_MASK(n);                                          \
     } else {                                                                   \
-      threecat(RELAY_, n, _PORT) &= ~threecat(RELAY_, n, _MASK);               \
+      RELAY_PORT(n) &= ~RELAY_MASK(n);                                         \
     }                                                                          \
   }
 
 #define GET_RELAY(n)                                                           \
-  if (threecat(RELAY_, n, _PORT) & threecat(RELAY_, n, _MASK)) {               \
-    state |= _BV(n - 1);                                                       \
+  if (RELAY_PORT(n) & RELAY_MASK(n)) {                                         \
+    state |= (1 << (n - 1));                                                   \
   }
 
-#define RELAY_1_PORT concat(PORT, RELAY_1_IOPORT_NAME)
-#define RELAY_1_DDR concat(DDR, RELAY_1_IOPORT_NAME)
-#define RELAY_1_MASK _BV(RELAY_1_BIT)
 #define INIT_RELAY_1() INIT_RELAY(1)
 #define GET_RELAY_1() GET_RELAY(1)
 #define SET_RELAY_1() SET_RELAY(1)
 
 #if NUM_RELAYS >= 2
-#define RELAY_2_PORT concat(PORT, RELAY_2_IOPORT_NAME)
-#define RELAY_2_DDR concat(DDR, RELAY_2_IOPORT_NAME)
-#define RELAY_2_MASK _BV(RELAY_2_BIT)
 #define INIT_RELAY_2() INIT_RELAY(2)
 #define GET_RELAY_2() GET_RELAY(2)
 #define SET_RELAY_2() SET_RELAY(2)
@@ -57,9 +60,6 @@
 #endif
 
 #if NUM_RELAYS >= 3
-#define RELAY_3_PORT concat(PORT, RELAY_3_IOPORT_NAME)
-#define RELAY_3_DDR concat(DDR, RELAY_3_IOPORT_NAME)
-#define RELAY_3_MASK _BV(RELAY_2_BIT)
 #define INIT_RELAY_3() INIT_RELAY(3)
 #define GET_RELAY_3() GET_RELAY(3)
 #define SET_RELAY_3() SET_RELAY(3)
@@ -70,9 +70,6 @@
 #endif
 
 #if NUM_RELAYS >= 4
-#define RELAY_4_PORT concat(PORT, RELAY_4_IOPORT_NAME)
-#define RELAY_4_DDR concat(DDR, RELAY_4_IOPORT_NAME)
-#define RELAY_4_MASK _BV(RELAY_4_BIT)
 #define INIT_RELAY_4() INIT_RELAY(4)
 #define GET_RELAY_4() GET_RELAY(4)
 #define SET_RELAY_4() SET_RELAY(4)
@@ -83,9 +80,6 @@
 #endif
 
 #if NUM_RELAYS >= 5
-#define RELAY_5_PORT concat(PORT, RELAY_5_IOPORT_NAME)
-#define RELAY_5_DDR concat(DDR, RELAY_5_IOPORT_NAME)
-#define RELAY_5_MASK _BV(RELAY_5_BIT)
 #define INIT_RELAY_5() INIT_RELAY(5)
 #define GET_RELAY_5() GET_RELAY(5)
 #define SET_RELAY_5() SET_RELAY(5)
@@ -96,9 +90,6 @@
 #endif
 
 #if NUM_RELAYS >= 6
-#define RELAY_6_PORT concat(PORT, RELAY_6_IOPORT_NAME)
-#define RELAY_6_DDR concat(DDR, RELAY_6_IOPORT_NAME)
-#define RELAY_6_MASK _BV(RELAY_6_BIT)
 #define INIT_RELAY_6() INIT_RELAY(6)
 #define GET_RELAY_6() GET_RELAY(6)
 #define SET_RELAY_6() SET_RELAY(6)
@@ -109,9 +100,6 @@
 #endif
 
 #if NUM_RELAYS >= 7
-#define RELAY_7_PORT concat(PORT, RELAY_7_IOPORT_NAME)
-#define RELAY_7_DDR concat(DDR, RELAY_7_IOPORT_NAME)
-#define RELAY_7_MASK _BV(RELAY_7_BIT)
 #define INIT_RELAY_7() INIT_RELAY(7)
 #define GET_RELAY_7() GET_RELAY(7)
 #define SET_RELAY_7() SET_RELAY(7)
@@ -122,9 +110,6 @@
 #endif
 
 #if NUM_RELAYS >= 8
-#define RELAY_8_PORT concat(PORT, RELAY_8_IOPORT_NAME)
-#define RELAY_8_DDR concat(DDR, RELAY_8_IOPORT_NAME)
-#define RELAY_8_MASK _BV(RELAY_8_BIT)
 #define INIT_RELAY_8() INIT_RELAY(8)
 #define GET_RELAY_8() GET_RELAY(8)
 #define SET_RELAY_8() SET_RELAY(8)
