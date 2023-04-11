@@ -30,6 +30,10 @@ jobs:
             cross:
               - cross/dcttech_8ch_cross.txt
 
+          - name: dcttech 2 channel
+            cross:
+              - cross/dcttech_2ch_cross.txt
+
     steps:
       - name: Checkout
         uses: actions/checkout@master

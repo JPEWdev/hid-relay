@@ -1,0 +1,64 @@
+# This cross file defines how to build software for the dcttech 8 channel HID
+# Relay boards available to purchase from many retailers.
+
+[binaries]
+c = 'avr-gcc'
+objcopy = 'avr-objcopy'
+ar = 'avr-ar'
+strip = 'avr-strip'
+size = 'avr-size'
+avrdude = 'avrdude'
+
+[built-in options]
+
+[properties]
+# The speed the device will be programmed by avrdude
+avrdude_speed = '1.1'
+
+# Number of relays. Must be in the range [1..8]
+num_relays = 2
+
+calibrate_oscillator = true
+
+# Controls which driver is used to set the relays. See: src/drivers/
+relay_driver = 'simple'
+relay_ioport = 'B'
+relay_offset = 3
+
+# The speed of the CPU clock, in Hz
+cpu_speed = 16000000
+
+usb_ioport = 'B'
+usb_dminus_bit = 1
+usb_dplus_bit = 2
+
+# MOSI port
+led_ioport = 'B'
+led_bit = 0
+
+# FUSES:
+#
+#    N = Unprogrammed(1)
+#    Y = Programmed(0)
+#
+# BIT    LOW            HIGH            EXTENDED
+# 7      CLKDIV8=N      RTSDISBL=N
+# 6      CKOUT=N        DWEN=N
+# 5      SUT1=N         SPIEN=Y
+# 4      SUT0=Y         WDTON=N
+# 3      CKSEL3=Y       EESAVE=N
+# 2      CKSEL2=Y       BODLEVEL2=N
+# 1      CKSEL1=Y       BODLEVEL1=Y
+# 0      CKSEL0=N       BODLEVEL0=N     SELFPRGEN=N
+#
+# http://www.engbedded.com/fusecalc/
+
+lfuse = '0xe1'
+hfuse = '0xdd'
+efuse = '0xff'
+
+[host_machine]
+system = 'baremetal'
+cpu_family = 'avr'
+cpu = 'attiny45'
+endian = 'little'
