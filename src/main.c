@@ -69,6 +69,10 @@ uint8_t buf_len;
 uint8_t EEMEM serial[] = {'J', 'P', 'E', 'W', '0'};
 _Static_assert(sizeof(serial) == SERIAL_LEN, "Invalid serial number length");
 
+#if CALIBRATE_OSCILLATOR
+uint8_t EEMEM saved_osccal = 0xFF;
+#endif
+
 #if REPORT_SERIAL
 int usbDescriptorStringSerialNumber[1 + SERIAL_LEN];
 
@@ -164,6 +168,60 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
                host */
 }
 
+#if CALIBRATE_OSCILLATOR
+void calibrateOscillator(void) {
+  uchar step = 128;
+  uchar trialValue = 0, optimumValue;
+  int x, optimumDev,
+      targetValue = (unsigned)(1499 * (double)F_CPU / 10.5e6 + 0.5);
+
+  /* do a binary search: */
+  do {
+    OSCCAL = trialValue + step;
+    x = usbMeasureFrameLength(); /* proportional to current real frequency */
+    if (x < targetValue)         /* frequency still too low */
+      trialValue += step;
+    step >>= 1;
+  } while (step > 0);
+  /* We have a precision of +/- 1 for optimum OSCCAL here */
+  /* now do a neighborhood search for optimum value */
+  optimumValue = trialValue;
+  optimumDev = x; /* this is certainly far away from optimum */
+  for (OSCCAL = trialValue - 1; OSCCAL <= trialValue + 1; OSCCAL++) {
+    x = usbMeasureFrameLength() - targetValue;
+    if (x < 0)
+      x = -x;
+    if (x < optimumDev) {
+      optimumDev = x;
+      optimumValue = OSCCAL;
+    }
+  }
+  OSCCAL = optimumValue;
+}
+
+/*
+ * Note: This calibration algorithm may try OSCCAL values of up to 192 even if
+ * the optimum value is far below 192. It may therefore exceed the allowed
+ * clock frequency of the CPU in low voltage designs!
+ * You may replace this search algorithm with any other algorithm you like if
+ * you have additional constraints such as a maximum CPU clock.
+ * For version 5.x RC oscillators (those with a split range of 2x128 steps,
+ * e.g. ATTiny25, ATTiny45, ATTiny85), it may be useful to search for the
+ * optimum in both regions.
+ */
+void usbEventResetReady(void) {
+  /* Disable interrupts during oscillator calibration since
+   * usbMeasureFrameLength() counts CPU cycles.
+   */
+  cli();
+  calibrateOscillator();
+  sei();
+
+  eeprom_update_byte(&saved_osccal, OSCCAL);
+}
+
+#endif
+
 int main(void) {
   init_relays();
 
@@ -176,6 +234,15 @@ int main(void) {
   usbDescriptorStringSerialNumber[0] = USB_STRING_DESCRIPTOR_HEADER(SERIAL_LEN);
   eeprom_read_block(buf, serial, SERIAL_LEN);
   set_ram_serial(buf);
+#endif
+
+#if CALIBRATE_OSCILLATOR
+  {
+    uint8_t val = eeprom_read_byte(&saved_osccal);
+    if (val != 0xFF) {
+      OSCCAL = val;
+    }
+  }
 #endif
 
 #if ENABLE_WATCHDOG
