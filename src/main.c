@@ -24,6 +24,14 @@
 #define LED_PIN concat(PIN, LED_IOPORT_NAME)
 #define LED_DDR concat(DDR, LED_IOPORT_NAME)
 #define LED_MASK _BV(LED_BIT)
+
+#define led_on() (LED_PORT |= LED_MASK)
+#define led_off() (LED_PORT &= ~LED_MASK)
+#define led_toggle() (LED_PORT ^= LED_MASK)
+#else
+#define led_on()
+#define led_off()
+#define led_toggle()
 #endif
 
 #define USB_HID_REPORT_TYPE_FEATURE 3
