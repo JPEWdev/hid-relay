@@ -16,6 +16,23 @@ software uses the [V-USB](https://www.obdev.at/products/vusb/index.html)
 project to implement the USB protocol, and should be able to run on any chip
 that V-USB supports.
 
+## Quick Install
+
+1. Install `avrdude` (e.g. `sudo apt install avrdude`)
+2. Go to the [releases](https://github.com/JPEWdev/hid-relay/releases) page and
+   download the `flash.hex`, `eeprom.hex` and `fuses.txt` files for the device
+   you want to program
+3. Connect your AVR In System Programmer (ISP) to the relay device, and it with
+   the command:
+
+    avrdude -P <MY_PROGRAMMER> $(cat fuses.txt)
+
+4. Write the main program code and eeprom to the device by using the command:
+
+    avrdude -P <MY_PROGRAMMER> -p <MY_DEVICE> \
+        flash:w:flash.hex:i \
+        eeprom:w:eeprom.hex:i
+
 ## Compiling
 
 [meson](https://mesonbuild.com/) is used as the build configuration system for
