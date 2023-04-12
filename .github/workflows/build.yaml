@@ -3,7 +3,13 @@ name: build
 run-name: Build
 on:
   pull_request: {}
-  push: {}
+  push:
+    branches:
+      - '*'
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+permissions:
+  contents: write
 jobs:
   build:
     name: Build Firmware
@@ -68,3 +74,24 @@ jobs:
       - name: Show stats for ${{ matrix.name }}
         run: |
           ninja -C builddir stats
+
+      - name: Upload flash file
+        uses: svenstaro/upload-release-action@2.5.0
+        with:
+          file: builddir/hidrelay.hex
+          asset_name: "${{ matrix.name }} flash.hex"
+        if: "github.event_name == 'push' && github.ref_type == 'tag'"
+
+      - name: Upload eeprom file
+        uses: svenstaro/upload-release-action@2.5.0
+        with:
+          file: builddir/hidrelay.ee.hex
+          asset_name: "${{ matrix.name }} eeprom.hex"
+        if: "github.event_name == 'push' && github.ref_type == 'tag'"
+
+      - name: Upload fuse config
+        uses: svenstaro/upload-release-action@2.5.0
+        with:
+          file: builddir/fuses.txt
+          asset_name: "${{ matrix.name }} fuses.txt"
+        if: "github.event_name == 'push' && github.ref_type == 'tag'"
