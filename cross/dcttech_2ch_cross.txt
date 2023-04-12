@@ -4,6 +4,7 @@
 [binaries]
 c = 'avr-gcc'
 objcopy = 'avr-objcopy'
+objdump = 'avr-objdump'
 ar = 'avr-ar'
 strip = 'avr-strip'
 size = 'avr-size'

@@ -97,6 +97,17 @@ program = executable('hidrelay', [
   ]
 )
 
+objdump = find_program('objdump')
+custom_target('disassembly',
+  input: program,
+  output: program.name() + '.asm',
+  capture: true,
+  command: [
+    objdump,
+    '-S', '@INPUT@',
+  ]
+)
+
 objcopy = find_program('objcopy')
 
 program_hex = custom_target('program-hex',
