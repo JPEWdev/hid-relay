@@ -16,6 +16,9 @@ avrdude = 'avrdude'
 # The speed the device will be programmed by avrdude
 avrdude_speed = '1.1'
 
+# The part to pass to avrdude
+avrdude_part = 't45'
+
 # Number of relays. Must be in the range [1..8]
 num_relays = 2
 

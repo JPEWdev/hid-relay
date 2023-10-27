@@ -1,3 +1,6 @@
+[properties]
+avrdude_part = 't261'
+
 [host_machine]
 system = 'baremetal'
 cpu_family = 'avr'
