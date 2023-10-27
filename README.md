@@ -24,14 +24,16 @@ that V-USB supports.
    you want to program
 3. Connect your AVR In System Programmer (ISP) to the relay device, and it with
    the command:
-
-    avrdude -P <MY_PROGRAMMER> $(cat fuses.txt)
+```
+avrdude -P <MY_PROGRAMMER> $(cat fuses.txt)
+```
 
 4. Write the main program code and eeprom to the device by using the command:
-
-    avrdude -P <MY_PROGRAMMER> -p <MY_DEVICE> \
-        flash:w:flash.hex:i \
-        eeprom:w:eeprom.hex:i
+```
+avrdude -P <MY_PROGRAMMER> -p <MY_DEVICE> \
+  -U flash:w:flash.hex:i \
+  -U eeprom:w:eeprom.hex:i
+```
 
 ## Compiling
 
