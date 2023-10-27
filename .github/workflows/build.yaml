@@ -21,24 +21,29 @@ jobs:
             cross:
               - cross/HIDRelayController_cross.txt
               - cross/attiny261_cross.txt
+            options: "-Dusb_serial_id=false"
 
           - name: HIDRelayController attiny461
             cross:
               - cross/HIDRelayController_cross.txt
               - cross/attiny461_cross.txt
+            options: ""
 
           - name: HIDRelayController attiny861
             cross:
               - cross/HIDRelayController_cross.txt
               - cross/attiny861_cross.txt
+            options: ""
 
           - name: dcttech 8 channel
             cross:
               - cross/dcttech_8ch_cross.txt
+            options: ""
 
           - name: dcttech 2 channel
             cross:
               - cross/dcttech_2ch_cross.txt
+            options: ""
 
     steps:
       - name: Checkout
@@ -53,7 +58,7 @@ jobs:
 
       - name: Configure ${{ matrix.name }}
         run: |
-          meson setup --cross-file=${{ join( matrix.cross, ' --cross-file=') }} builddir
+          meson setup --cross-file=${{ join( matrix.cross, ' --cross-file=') }} ${{ matrix.options }} builddir
 
       - name: Check formatting
         run: |
