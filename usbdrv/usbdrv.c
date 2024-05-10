@@ -428,6 +428,10 @@ usbRequest_t    *rq = (void *)data;
  * 0...0x0f for OUT on endpoint X
  */
     DBG2(0x10 + (usbRxToken & 0xf), data, len + 2); /* SETUP=1d, SETUP-DATA=11, OUTx=1x */
+#if CHECK_CRC
+    if (usbCrc16(data, len + 2) != 0x4FFE)
+        return;
+#endif
     USB_RX_USER_HOOK(data, len)
 #if USB_CFG_IMPLEMENT_FN_WRITEOUT
     if(usbRxToken < 0x10){  /* OUT to endpoint != 0: endpoint number in usbRxToken */
