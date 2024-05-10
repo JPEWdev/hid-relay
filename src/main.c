@@ -63,8 +63,6 @@ _Static_assert(sizeof(usbHidReportDescriptor) ==
                    USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH,
                "usbHidReportDescriptor length does not match "
                "USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH");
-uint8_t buf[8];
-uint8_t buf_len;
 
 uint8_t EEMEM serial[] = {'J', 'P', 'E', 'W', '0'};
 _Static_assert(sizeof(serial) == SERIAL_LEN, "Invalid serial number length");
@@ -91,24 +89,18 @@ void set_serial(uint8_t const *data) {
 }
 
 uchar usbFunctionWrite(uchar *data, uchar len) {
-  if (buf_len + len >= sizeof(buf)) {
-    len = sizeof(buf) - buf_len;
-  }
-
-  if (len == 0) {
+  if (len < 1) {
     return 0xff;
   }
 
-  memcpy(&buf[buf_len], data, len);
-  buf_len += len;
-
-  switch (buf[0]) {
+  switch (data[0]) {
   case CMD_SET_SERIAL:
-    if (buf_len == 8) {
-      set_serial(&buf[1]);
-      return 1;
+    if (len < 8) {
+      return 0xff;
     }
-    break;
+
+    set_serial(&data[1]);
+    return 1;
 
   case CMD_ALL_OFF:
     set_all_relays(false);
@@ -120,31 +112,34 @@ uchar usbFunctionWrite(uchar *data, uchar len) {
 
   case CMD_ON:
   case CMD_OFF:
-    if (buf_len >= 2) {
-      if (buf[1] >= 1 && buf[1] <= NUM_RELAYS) {
-        set_relay(buf[1] - 1, buf[0] == CMD_ON);
-      }
-      return 1;
+    if (len < 2) {
+      return 0xff;
     }
-    break;
+
+    if (data[1] >= 1 && data[1] <= NUM_RELAYS) {
+      set_relay(data[1] - 1, data[0] == CMD_ON);
+    }
+    return 1;
   }
 
-  return 0;
+  // Unknown command
+  return 0xff;
 }
 
 usbMsgLen_t usbFunctionSetup(uchar data[8]) {
   usbRequest_t *rq = (void *)data;
+  static uint8_t reply_buf[8];
 
   if ((rq->bmRequestType & USBRQ_TYPE_MASK) == USBRQ_TYPE_CLASS) {
     DBG1(0x50, &rq->bRequest, 1); /* debug output: print our request */
     if (rq->bRequest == GET_REPORT) {
       if (rq->wValue.bytes[0] == 0 &&
           rq->wValue.bytes[1] == USB_HID_REPORT_TYPE_FEATURE) {
-        eeprom_read_block(buf, serial, SERIAL_LEN);
-        buf[6] = 0;
-        buf[7] = get_relay_state();
+        eeprom_read_block(reply_buf, serial, SERIAL_LEN);
+        reply_buf[6] = 0;
+        reply_buf[7] = get_relay_state();
 
-        usbMsgPtr = buf;
+        usbMsgPtr = reply_buf;
 
         return 8;
       }
@@ -152,9 +147,6 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
     } else if (rq->bRequest == SET_REPORT) {
       if (rq->wValue.bytes[0] == 0 &&
           rq->wValue.bytes[1] == USB_HID_REPORT_TYPE_FEATURE) {
-        memset(buf, 0, sizeof(buf));
-        buf_len = 0;
-
         return USB_NO_MSG;
       }
     }
@@ -231,9 +223,15 @@ int main(void) {
 #endif
 
 #if REPORT_SERIAL
-  usbDescriptorStringSerialNumber[0] = USB_STRING_DESCRIPTOR_HEADER(SERIAL_LEN);
-  eeprom_read_block(buf, serial, SERIAL_LEN);
-  set_ram_serial(buf);
+  {
+    uint8_t buf[SERIAL_LEN];
+
+    usbDescriptorStringSerialNumber[0] =
+        USB_STRING_DESCRIPTOR_HEADER(SERIAL_LEN);
+
+    eeprom_read_block(buf, serial, SERIAL_LEN);
+    set_ram_serial(buf);
+  }
 #endif
 
 #if CALIBRATE_OSCILLATOR
