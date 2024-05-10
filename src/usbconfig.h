@@ -247,7 +247,10 @@ void usbEventResetReady(void);
  * with libusb: 0x16c0/0x5dc.  Use this VID/PID pair ONLY if you understand
  * the implications!
  */
-#define USB_CFG_DEVICE_VERSION  0x00, 0x01
+
+#define bcd(v)  ((v / 10) << 4) | (v % 10)
+
+#define USB_CFG_DEVICE_VERSION bcd(VERSION_MINOR), bcd(VERSION_MAJOR)
 /* Version number of the device: Minor number first, then major number.
  */
 #define USB_CFG_VENDOR_NAME     'w', 'w', 'w', '.', 'd', 'c', 't', 't', 'e', 'c', 'h', '.', 'c', 'o', 'm'

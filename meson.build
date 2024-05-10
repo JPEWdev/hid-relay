@@ -1,4 +1,5 @@
 project('HIDRelay', 'c',
+  version: '1.1',
   default_options: [
     'buildtype=minsize',
     'b_lto=false',
@@ -44,6 +45,8 @@ add_project_arguments(
     '-DENABLE_WATCHDOG=' + (enable_watchdog ? '1' : '0'),
     '-DCALIBRATE_OSCILLATOR=' + (calibrate_oscillator ? '1' : '0'),
     '-DCHECK_CRC=' + (check_crc ? '1' : '0'),
+    '-DVERSION_MAJOR=' + meson.project_version().split('.')[0] + 'UL',
+    '-DVERSION_MINOR=' + meson.project_version().split('.')[1] + 'UL',
     language: 'c',
 )
 
