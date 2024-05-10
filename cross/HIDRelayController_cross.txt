@@ -43,6 +43,10 @@ led_bit = 1
 # The speed of the CPU clock, in Hz
 cpu_speed = 12000000
 
+# Check CRCs an use the fast (vs small) algorithm
+check_crc = true
+fast_crc = true
+
 # This is the port where the USB bus is connected. When you configure it to
 # "B", the registers PORTB, PINB and DDRB will be used.
 usb_ioport = 'B'

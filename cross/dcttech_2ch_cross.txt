@@ -24,6 +24,10 @@ num_relays = 2
 
 calibrate_oscillator = true
 
+# Check CRCs an use the fast (vs small) algorithm
+check_crc = true
+fast_crc = true
+
 # Controls which driver is used to set the relays. See: src/drivers/
 relay_driver = 'simple'
 relay_ioport = 'B'
