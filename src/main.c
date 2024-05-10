@@ -82,7 +82,7 @@ void set_ram_serial(uint8_t const *data) {
 #endif
 
 void set_serial(uint8_t const *data) {
-  eeprom_write_block(data, serial, SERIAL_LEN);
+  eeprom_update_block(data, serial, SERIAL_LEN);
 #if REPORT_SERIAL
   set_ram_serial(data);
 #endif
