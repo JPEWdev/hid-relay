@@ -21,6 +21,7 @@ num_relays = meson.get_cross_property('num_relays')
 enable_watchdog = meson.get_cross_property('enable_watchdog', true)
 calibrate_oscillator = meson.get_cross_property('calibrate_oscillator', false)
 check_crc = meson.get_cross_property('check_crc', true)
+fast_crc = meson.get_cross_property('fast_crc', false)
 
 assert(usb_ioport in ['A', 'B', 'C', 'D'], '"@0@" is not a valid I/O port'.format(usb_ioport))
 assert(num_relays >= 1 and num_relays <= 8, 'num_relays must be in the range [1..8]')
@@ -37,6 +38,7 @@ add_project_arguments(
     '-DUSB_CFG_IOPORTNAME=' + usb_ioport,
     '-DUSB_CFG_DMINUS_BIT=' + usb_dminus_bit.to_string(),
     '-DUSB_CFG_DPLUS_BIT=' + usb_dplus_bit.to_string(),
+    '-DUSB_USE_FAST_CRC=' + (fast_crc ? '1' : '0'),
     '-DNUM_RELAYS=' + num_relays.to_string(),
     '-DREPORT_SERIAL=' + (get_option('usb_serial_id') ? '1' : '0'),
     '-DENABLE_WATCHDOG=' + (enable_watchdog ? '1' : '0'),
