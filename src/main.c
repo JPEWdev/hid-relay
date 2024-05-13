@@ -161,34 +161,76 @@ usbMsgLen_t usbFunctionSetup(uchar data[8]) {
 }
 
 #if CALIBRATE_OSCILLATOR
-void calibrateOscillator(void) {
-  uchar step = 128;
-  uchar trialValue = 0, optimumValue;
-  int x, optimumDev,
-      targetValue = (unsigned)(1499 * (double)F_CPU / 10.5e6 + 0.5);
+struct cal {
+  uchar value;
+  unsigned int dev;
+};
+
+static struct cal calibrate_range(uchar range) {
+  uchar step = 0x40;
+  uchar trialValue = range;
+  struct cal cal = {0, 0};
+
+  /*
+   *
+   * Keep alive frames are sent every 1 millisecond. usbMeasureFrameLength()
+   * returns cycles in multiples of 6, so the expected target cycles is:
+   * USB_CFG_CLOCK_KHZ / 6
+   *
+   * 0.5 is added to implement rounding up to the nearest integer because
+   * conversion to unsigned integers performs truncation
+   */
+  const unsigned int targetValue =
+      (unsigned int)(((double)USB_CFG_CLOCK_KHZ / 6) + 0.5);
 
   /* do a binary search: */
   do {
     OSCCAL = trialValue + step;
-    x = usbMeasureFrameLength(); /* proportional to current real frequency */
-    if (x < targetValue)         /* frequency still too low */
+    unsigned int x =
+        usbMeasureFrameLength(); /* proportional to current real frequency */
+    if (x == 0) {
+      return cal;
+    }
+
+    if (x < targetValue) /* frequency still too low */
       trialValue += step;
     step >>= 1;
   } while (step > 0);
   /* We have a precision of +/- 1 for optimum OSCCAL here */
   /* now do a neighborhood search for optimum value */
-  optimumValue = trialValue;
-  optimumDev = x; /* this is certainly far away from optimum */
+  cal.value = trialValue;
+  cal.dev = 0xFF;
   for (OSCCAL = trialValue - 1; OSCCAL <= trialValue + 1; OSCCAL++) {
-    x = usbMeasureFrameLength() - targetValue;
-    if (x < 0)
-      x = -x;
-    if (x < optimumDev) {
-      optimumDev = x;
-      optimumValue = OSCCAL;
+    unsigned int x = usbMeasureFrameLength();
+
+    if (x == 0) {
+      return cal;
+    }
+
+    if (x < targetValue) {
+      x = targetValue - x;
+    } else {
+      x = x - targetValue;
+    }
+
+    if (x < cal.dev) {
+      cal.dev = x;
+      cal.value = OSCCAL;
     }
   }
-  OSCCAL = optimumValue;
+
+  return cal;
+}
+
+static void calibrateOscillator() {
+  struct cal low_cal = calibrate_range(0);
+  struct cal hi_cal = calibrate_range(0x80);
+
+  if (hi_cal.value && hi_cal.dev < low_cal.dev) {
+    OSCCAL = hi_cal.value;
+  } else {
+    OSCCAL = low_cal.value;
+  }
 }
 
 /*

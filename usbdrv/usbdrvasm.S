@@ -296,7 +296,8 @@ usbCrc16Append:
 #   define resH     r17
 #   define cnt16L   r30
 #   define cnt16H   r31
-#   define cntH     r18
+#   define wait16H  r19
+#   define wait16L  r20
 
 #else  /* __IAR_SYSTEMS_ASM__ */ 
 /* Register assignments for usbMeasureFrameLength on gcc */
@@ -309,36 +310,43 @@ usbCrc16Append:
 #   define resH     r25
 #   define cnt16L   r24
 #   define cnt16H   r25
-#   define cntH     r26
+#   define wait16H  r27
+#   define wait16L  r26
 #endif
 #   define cnt16    cnt16L
+#   define wait16   wait16L
 
 ; extern unsigned usbMeasurePacketLength(void);
 ; returns time between two idle strobes in multiples of 7 CPU clocks
 .global usbMeasureFrameLength
 usbMeasureFrameLength:
-    ldi     cntH, 6         ; wait ~ 10 ms for D- == 0
     clr     cnt16L
     clr     cnt16H
-usbMFTime16:
-    dec     cntH
-    breq    usbMFTimeout
-usbMFWaitStrobe:            ; first wait for D- == 0 (idle strobe)
-    sbiw    cnt16, 1        ;[0] [6]
-    breq    usbMFTime16     ;[2]
-    sbic    USBIN, USBMINUS ;[3]
-    rjmp    usbMFWaitStrobe ;[4]
-usbMFWaitIdle:              ; then wait until idle again
-    sbis    USBIN, USBMINUS ;1 wait for D- == 1
-    rjmp    usbMFWaitIdle   ;2
-    ldi     cnt16L, 1       ;1 represents cycles so far
-    clr     cnt16H          ;1
-usbMFWaitLoop:
-    in      cntH, USBIN     ;[0] [7]
-    adiw    cnt16, 1        ;[1]
-    breq    usbMFTimeout    ;[3]
-    andi    cntH, USBMASK   ;[4]
-    brne    usbMFWaitLoop   ;[5]
+    ldi     wait16L, lo8(40000)
+    ldi     wait16H, hi8(40000)
+
+usbWaitForKeepAlive: # Loop until D- is low
+    sbiw    wait16, 1           ;[0] [5]
+    breq    usbMFTimeout        ;[1]
+    sbic    USBIN, USBMINUS     ;[2]
+    rjmp    usbWaitForKeepAlive ;    [3]
+
+    nop                         ;[4]
+
+usbMFKeepAliveLoop: # Loop until D- is high
+    adiw    cnt16, 1            ;[0] [5]
+    breq    usbMFTimeout        ;[1]
+    sbis    USBIN, USBMINUS     ;[2]
+    rjmp    usbMFKeepAliveLoop  ;    [3]
+
+    nop                         ;[4]
+
+usbMFIdleLoop: # Loop until D- is low
+    adiw    cnt16, 1            ;[0] [5]
+    breq    usbMFTimeout        ;[1]
+    sbic    USBIN, USBMINUS     ;[2]
+    rjmp    usbMFIdleLoop       ;    [3]
+
 usbMFTimeout:
 #if resL != cnt16L
     mov     resL, cnt16L
@@ -351,7 +359,9 @@ usbMFTimeout:
 #undef cnt16
 #undef cnt16L
 #undef cnt16H
-#undef cntH
+#undef wait16L
+#undef wait16H
+#undef wait16
 
 #endif  /* USB_CFG_HAVE_MEASURE_FRAME_LENGTH */
 
