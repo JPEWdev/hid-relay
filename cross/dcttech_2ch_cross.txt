@@ -33,8 +33,9 @@ relay_driver = 'simple'
 relay_ioport = 'B'
 relay_offset = 3
 
-# The speed of the CPU clock, in Hz
-cpu_speed = 16000000
+# The speed of the CPU clock, in Hz. Note that the clock source is the 16 MHz
+# PLL clock which will be calibrated to 16.5 MHz (if possible)
+cpu_speed = 16500000
 
 usb_ioport = 'B'
 usb_dminus_bit = 1

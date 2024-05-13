@@ -24,6 +24,10 @@ calibrate_oscillator = meson.get_cross_property('calibrate_oscillator', false)
 check_crc = meson.get_cross_property('check_crc', true)
 fast_crc = meson.get_cross_property('fast_crc', false)
 
+if calibrate_oscillator
+  assert(cpu_speed == 12800000 or cpu_speed == 16500000, 'CPU speed must be 12.8 MHz or 16.5 MHz with internal oscillator')
+endif
+
 assert(usb_ioport in ['A', 'B', 'C', 'D'], '"@0@" is not a valid I/O port'.format(usb_ioport))
 assert(num_relays >= 1 and num_relays <= 8, 'num_relays must be in the range [1..8]')
 assert(usb_dminus_bit >= 0 and usb_dminus_bit <= 7, '@0@ is not a valid port bit'.format(usb_dminus_bit))
