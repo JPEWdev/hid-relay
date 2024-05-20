@@ -1,5 +1,5 @@
 project('HIDRelay', 'c',
-  version: '1.1',
+  version: '1.2',
   default_options: [
     'buildtype=minsize',
     'b_lto=false',
